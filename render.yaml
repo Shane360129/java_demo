@@ -11,3 +11,5 @@ services:
     envVars:
       - key: JAVA_TOOL_OPTIONS
         value: -Xmx400m -XX:+UseSerialGC
+      - key: APP_CORS_ALLOWED_ORIGINS
+        value: https://shane360129.github.io,http://localhost:5173

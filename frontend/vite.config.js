@@ -3,8 +3,9 @@ import vue from '@vitejs/plugin-vue'
 
 export default defineConfig({
   plugins: [vue()],
+  base: process.env.VITE_BASE_PATH || '/',
   build: {
-    outDir: '../src/main/resources/static',
+    outDir: process.env.VITE_OUT_DIR || '../src/main/resources/static',
     emptyOutDir: true,
   },
   server: {
