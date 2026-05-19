@@ -17,6 +17,8 @@ public class TaskRequest {
 
     private Task.Status status = Task.Status.TODO;
 
+    private Task.Priority priority = Task.Priority.MEDIUM;
+
     private LocalDate dueDate;
 
     public String getTitle() { return title; }
@@ -27,6 +29,9 @@ public class TaskRequest {
 
     public Task.Status getStatus() { return status; }
     public void setStatus(Task.Status status) { this.status = status; }
+
+    public Task.Priority getPriority() { return priority; }
+    public void setPriority(Task.Priority priority) { this.priority = priority; }
 
     public LocalDate getDueDate() { return dueDate; }
     public void setDueDate(LocalDate dueDate) { this.dueDate = dueDate; }

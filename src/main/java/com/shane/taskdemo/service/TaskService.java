@@ -7,6 +7,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -42,6 +43,13 @@ public class TaskService {
     }
 
     @Transactional
+    public Task updateStatus(Long id, Task.Status status) {
+        Task task = findById(id);
+        applyStatus(task, status);
+        return repository.save(task);
+    }
+
+    @Transactional
     public void delete(Long id) {
         if (!repository.existsById(id)) {
             throw new EntityNotFoundException("Task not found: " + id);
@@ -49,10 +57,27 @@ public class TaskService {
         repository.deleteById(id);
     }
 
+    @Transactional
+    public long deleteCompleted() {
+        return repository.deleteByStatus(Task.Status.DONE);
+    }
+
     private void apply(Task task, TaskRequest req) {
         task.setTitle(req.getTitle());
         task.setDescription(req.getDescription());
-        task.setStatus(req.getStatus() != null ? req.getStatus() : Task.Status.TODO);
+        task.setPriority(req.getPriority() != null ? req.getPriority() : Task.Priority.MEDIUM);
         task.setDueDate(req.getDueDate());
+        applyStatus(task, req.getStatus() != null ? req.getStatus() : Task.Status.TODO);
+    }
+
+    private void applyStatus(Task task, Task.Status newStatus) {
+        boolean wasDone = task.getStatus() == Task.Status.DONE;
+        boolean nowDone = newStatus == Task.Status.DONE;
+        if (nowDone && !wasDone) {
+            task.setCompletedAt(LocalDateTime.now());
+        } else if (!nowDone) {
+            task.setCompletedAt(null);
+        }
+        task.setStatus(newStatus);
     }
 }

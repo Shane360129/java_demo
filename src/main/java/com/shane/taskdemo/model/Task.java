@@ -30,12 +30,19 @@ public class Task {
     @Column(nullable = false, length = 20)
     private Status status = Status.TODO;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 10)
+    private Priority priority = Priority.MEDIUM;
+
     private LocalDate dueDate;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    private LocalDateTime completedAt;
+
     public enum Status { TODO, IN_PROGRESS, DONE }
+    public enum Priority { LOW, MEDIUM, HIGH }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -49,9 +56,15 @@ public class Task {
     public Status getStatus() { return status; }
     public void setStatus(Status status) { this.status = status; }
 
+    public Priority getPriority() { return priority; }
+    public void setPriority(Priority priority) { this.priority = priority; }
+
     public LocalDate getDueDate() { return dueDate; }
     public void setDueDate(LocalDate dueDate) { this.dueDate = dueDate; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public LocalDateTime getCompletedAt() { return completedAt; }
+    public void setCompletedAt(LocalDateTime completedAt) { this.completedAt = completedAt; }
 }
