@@ -33,7 +33,10 @@ watch(
 )
 
 function onSubmit() {
-  if (!form.value.title.trim()) return
+  if (!form.value.title.trim()) {
+    titleInput.value?.focus()
+    return
+  }
   emit('submit', {
     title: form.value.title.trim(),
     description: form.value.description?.trim() || null,
@@ -43,6 +46,41 @@ function onSubmit() {
   })
   if (!props.initial) form.value = emptyForm()
 }
+
+function setDatePreset(preset) {
+  const today = new Date()
+  let target
+  if (preset === 'today') {
+    target = today
+  } else if (preset === 'tomorrow') {
+    target = new Date(today.getTime() + 86400000)
+  } else if (preset === 'weekend') {
+    const day = today.getDay()
+    const diff = (6 - day + 7) % 7 || 7
+    target = new Date(today.getTime() + diff * 86400000)
+  } else if (preset === 'nextweek') {
+    target = new Date(today.getTime() + 7 * 86400000)
+  } else {
+    form.value.dueDate = ''
+    return
+  }
+  form.value.dueDate = target.toISOString().slice(0, 10)
+}
+
+const datePresets = [
+  { key: 'today', label: '今天' },
+  { key: 'tomorrow', label: '明天' },
+  { key: 'weekend', label: '週末' },
+  { key: 'nextweek', label: '下週' },
+  { key: 'clear', label: '✕' },
+]
+
+defineExpose({
+  focusTitle() {
+    titleInput.value?.focus()
+    titleInput.value?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  },
+})
 </script>
 
 <template>
@@ -66,7 +104,7 @@ function onSubmit() {
         placeholder="補充細節（選填）"
       />
     </label>
-    <div class="row three">
+    <div class="row two">
       <label>
         狀態
         <select v-model="form.status">
@@ -83,14 +121,26 @@ function onSubmit() {
           <option value="LOW">⚪ 低</option>
         </select>
       </label>
-      <label>
-        截止日
-        <input type="date" v-model="form.dueDate" />
-      </label>
     </div>
+    <label class="date-label">
+      截止日
+      <div class="date-presets">
+        <button
+          v-for="p in datePresets"
+          :key="p.key"
+          type="button"
+          class="chip"
+          :title="p.key === 'clear' ? '清除截止日' : `設為${p.label}`"
+          @click="setDatePreset(p.key)"
+        >
+          {{ p.label }}
+        </button>
+      </div>
+      <input type="date" v-model="form.dueDate" />
+    </label>
     <div class="actions">
       <button type="submit">{{ initial ? '💾 更新' : '➕ 新增' }}</button>
-      <button v-if="initial" type="button" class="ghost" @click="$emit('cancel')">取消</button>
+      <button v-if="initial" type="button" class="ghost" @click="emit('cancel')">取消</button>
     </div>
   </form>
 </template>

@@ -1,8 +1,10 @@
 <script setup>
 defineProps({
   tasks: { type: Array, default: () => [] },
+  loading: { type: Boolean, default: false },
+  filterActive: { type: Boolean, default: false },
 })
-defineEmits(['edit', 'delete', 'cycle-status'])
+defineEmits(['edit', 'delete', 'cycle-status', 'reset-filter', 'add-first'])
 
 const statusText = {
   TODO: '待辦',
@@ -35,11 +37,27 @@ function formatDueDate(date) {
 </script>
 
 <template>
-  <p v-if="!tasks.length" class="empty">
-    <span class="empty-icon">📋</span>
-    <span>沒有符合條件的任務</span>
-  </p>
-  <ul v-else class="task-list">
+  <div v-if="loading" class="skeleton-list" aria-label="載入中">
+    <div v-for="n in 3" :key="n" class="skeleton-task">
+      <span class="skeleton-circle"></span>
+      <span class="skeleton-lines">
+        <span class="skeleton-line w-70"></span>
+        <span class="skeleton-line w-40"></span>
+      </span>
+    </div>
+  </div>
+  <div v-else-if="!tasks.length" class="empty">
+    <span class="empty-icon" aria-hidden="true">{{ filterActive ? '🔎' : '🎉' }}</span>
+    <span>{{ filterActive ? '沒有符合條件的任務' : '一筆任務都沒有，開始新增吧！' }}</span>
+    <button
+      type="button"
+      class="empty-cta"
+      @click="filterActive ? $emit('reset-filter') : $emit('add-first')"
+    >
+      {{ filterActive ? '清除篩選與搜尋' : '新增第一筆任務' }}
+    </button>
+  </div>
+  <TransitionGroup v-else name="task" tag="ul" class="task-list">
     <li
       v-for="task in tasks"
       :key="task.id"
@@ -52,14 +70,14 @@ function formatDueDate(date) {
         :aria-label="`切換狀態，目前 ${statusText[task.status]}`"
         @click="$emit('cycle-status', task)"
       >
-        <svg v-if="task.status === 'TODO'" viewBox="0 0 24 24" width="16" height="16">
+        <svg v-if="task.status === 'TODO'" viewBox="0 0 24 24" width="18" height="18">
           <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/>
         </svg>
-        <svg v-else-if="task.status === 'IN_PROGRESS'" viewBox="0 0 24 24" width="16" height="16">
+        <svg v-else-if="task.status === 'IN_PROGRESS'" viewBox="0 0 24 24" width="18" height="18">
           <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/>
           <path d="M12 3 A9 9 0 0 1 12 21 Z" fill="currentColor"/>
         </svg>
-        <svg v-else viewBox="0 0 24 24" width="16" height="16">
+        <svg v-else viewBox="0 0 24 24" width="18" height="18">
           <circle cx="12" cy="12" r="9" fill="currentColor"/>
           <path d="M7 12 l4 4 l6 -7" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
@@ -109,5 +127,5 @@ function formatDueDate(date) {
         </button>
       </div>
     </li>
-  </ul>
+  </TransitionGroup>
 </template>

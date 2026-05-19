@@ -1,5 +1,7 @@
 <script setup>
-const props = defineProps({
+import { useTemplateRef } from 'vue'
+
+defineProps({
   filter: { type: String, required: true },
   search: { type: String, required: true },
   sortBy: { type: String, required: true },
@@ -12,11 +14,20 @@ const emit = defineEmits([
   'clear-completed',
 ])
 
+const searchInput = useTemplateRef('searchInput')
+
 const tabs = [
-  { value: 'all', label: '全部', key: 'total' },
-  { value: 'active', label: '待處理', key: 'active' },
-  { value: 'done', label: '已完成', key: 'done' },
+  { value: 'all', label: '全部', key: 'total', shortcut: '1' },
+  { value: 'active', label: '待處理', key: 'active', shortcut: '2' },
+  { value: 'done', label: '已完成', key: 'done', shortcut: '3' },
 ]
+
+defineExpose({
+  focusSearch() {
+    searchInput.value?.focus()
+    searchInput.value?.select()
+  },
+})
 </script>
 
 <template>
@@ -29,6 +40,7 @@ const tabs = [
         role="tab"
         :aria-selected="filter === tab.value"
         :class="['tab', { active: filter === tab.value }]"
+        :title="`快捷鍵：${tab.shortcut}`"
         @click="emit('update:filter', tab.value)"
       >
         {{ tab.label }}
@@ -39,8 +51,9 @@ const tabs = [
       <div class="search-wrap">
         <span class="search-icon" aria-hidden="true">🔍</span>
         <input
+          ref="searchInput"
           type="search"
-          placeholder="搜尋標題或描述…"
+          placeholder="搜尋（按 / 聚焦）"
           :value="search"
           class="search-input"
           @input="emit('update:search', $event.target.value)"
