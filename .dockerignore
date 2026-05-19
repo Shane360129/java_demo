@@ -1,0 +1,9 @@
+target/
+node_modules/
+frontend/dist/
+src/main/resources/static/
+.git/
+.idea/
+.vscode/
+*.iml
+*.log
