@@ -17,6 +17,16 @@ export async function updateTask(id, payload) {
   return data
 }
 
+export async function updateTaskStatus(id, status) {
+  const { data } = await api.patch(`/tasks/${id}/status`, { status })
+  return data
+}
+
 export async function deleteTask(id) {
   await api.delete(`/tasks/${id}`)
+}
+
+export async function deleteCompleted() {
+  const { data } = await api.delete('/tasks/completed')
+  return data
 }

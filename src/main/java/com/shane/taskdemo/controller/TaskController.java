@@ -1,5 +1,6 @@
 package com.shane.taskdemo.controller;
 
+import com.shane.taskdemo.dto.StatusUpdate;
 import com.shane.taskdemo.dto.TaskRequest;
 import com.shane.taskdemo.model.Task;
 import com.shane.taskdemo.service.TaskService;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -50,6 +52,16 @@ public class TaskController {
     @PutMapping("/{id}")
     public Task update(@PathVariable Long id, @Valid @RequestBody TaskRequest req) {
         return service.update(id, req);
+    }
+
+    @PatchMapping("/{id}/status")
+    public Task updateStatus(@PathVariable Long id, @Valid @RequestBody StatusUpdate req) {
+        return service.updateStatus(id, req.getStatus());
+    }
+
+    @DeleteMapping("/completed")
+    public Map<String, Long> deleteCompleted() {
+        return Map.of("removed", service.deleteCompleted());
     }
 
     @DeleteMapping("/{id}")
