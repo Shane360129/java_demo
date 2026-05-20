@@ -90,6 +90,12 @@ const confirmState = ref({
 let confirmResolver = null
 
 function askConfirm(opts) {
+  // Auto-cancel any previously pending confirm so we never orphan a promise.
+  if (confirmResolver) {
+    const stale = confirmResolver
+    confirmResolver = null
+    stale(false)
+  }
   return new Promise((resolve) => {
     confirmState.value = {
       visible: true,
@@ -103,11 +109,11 @@ function askConfirm(opts) {
 }
 
 function closeConfirm(result) {
+  // Capture-and-null before resolving in case the resolver re-enters.
+  const resolver = confirmResolver
+  confirmResolver = null
   confirmState.value = { ...confirmState.value, visible: false }
-  if (confirmResolver) {
-    confirmResolver(result)
-    confirmResolver = null
-  }
+  if (resolver) resolver(result)
 }
 
 /* ---------- Help dialog ---------- */
@@ -262,18 +268,35 @@ async function handleCycleStatus(task) {
 }
 
 async function handleClearCompleted() {
-  if (!stats.value.done) return
-  const ok = await askConfirm({
-    title: '清除已完成',
-    message: `確定要清除全部 ${stats.value.done} 筆已完成任務？此動作無法復原。`,
-    confirmLabel: '清除',
-    danger: true,
-  })
-  if (!ok) return
+  const removed = tasks.value.filter((t) => t.status === 'DONE')
+  if (!removed.length) return
   try {
-    const { removed } = await deleteCompleted()
+    await deleteCompleted()
     tasks.value = tasks.value.filter((t) => t.status !== 'DONE')
-    showToast(`已清除 ${removed} 筆`, 'success')
+    showToast(`已清除 ${removed.length} 筆已完成`, 'success', {
+      action: '↶ 復原',
+      onAction: async () => {
+        try {
+          const recreated = await Promise.all(
+            removed.map((t) =>
+              createTask({
+                title: t.title,
+                description: t.description,
+                status: t.status,
+                priority: t.priority,
+                dueDate: t.dueDate,
+              }),
+            ),
+          )
+          tasks.value.unshift(...recreated)
+          showToast(`已復原 ${recreated.length} 筆`, 'success')
+        } catch (e) {
+          console.error(e)
+          showToast('復原失敗', 'error')
+          await refresh()
+        }
+      },
+    })
   } catch (e) {
     console.error(e)
     showToast('清除失敗', 'error')
