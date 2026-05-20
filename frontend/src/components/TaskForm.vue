@@ -92,6 +92,11 @@ defineExpose({
     titleInput.value?.focus()
     titleInput.value?.scrollIntoView({ behavior: 'smooth', block: 'center' })
   },
+  setDueDate(date) {
+    form.value.dueDate = date
+    titleInput.value?.focus()
+    titleInput.value?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  },
 })
 </script>
 

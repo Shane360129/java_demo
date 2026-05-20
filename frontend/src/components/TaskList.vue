@@ -2,6 +2,7 @@
 defineProps({
   tasks: { type: Array, default: () => [] },
   loading: { type: Boolean, default: false },
+  slowLoad: { type: Boolean, default: false },
   filterActive: { type: Boolean, default: false },
 })
 defineEmits(['edit', 'delete', 'cycle-status', 'reset-filter', 'add-first'])
@@ -45,6 +46,9 @@ function formatDueDate(date) {
         <span class="skeleton-line w-40"></span>
       </span>
     </div>
+    <p v-if="slowLoad" class="slow-hint">
+      ⏳ 後端正在喚醒中，Render 免費方案閒置會休眠，首次載入約需 30–50 秒…
+    </p>
   </div>
   <div v-else-if="!tasks.length" class="empty">
     <span class="empty-icon" aria-hidden="true">{{ filterActive ? '🔎' : '🎉' }}</span>
