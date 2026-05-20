@@ -5,6 +5,11 @@ target/
 node_modules/
 frontend/dist/
 
+# Local env overrides (commit .env.example only)
+.env
+.env.local
+.env.*.local
+
 # Vue build output (production goes into JAR via Dockerfile)
 src/main/resources/static/
 
