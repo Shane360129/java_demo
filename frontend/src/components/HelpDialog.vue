@@ -11,6 +11,7 @@ const shortcuts = [
   { keys: ['1'], desc: '切換到「全部」' },
   { keys: ['2'], desc: '切換到「待處理」' },
   { keys: ['3'], desc: '切換到「已完成」' },
+  { keys: ['V'], desc: '切換列表 / 行事曆檢視' },
   { keys: ['T'], desc: '切換深色模式' },
   { keys: ['?'], desc: '顯示這個說明' },
 ]

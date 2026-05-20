@@ -1,8 +1,10 @@
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, watch, useTemplateRef } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick, useTemplateRef } from 'vue'
 import TaskForm from './components/TaskForm.vue'
 import TaskList from './components/TaskList.vue'
 import TaskFilters from './components/TaskFilters.vue'
+import CalendarView from './components/CalendarView.vue'
+import SegmentedControl from './components/SegmentedControl.vue'
 import Toast from './components/Toast.vue'
 import ConfirmDialog from './components/ConfirmDialog.vue'
 import HelpDialog from './components/HelpDialog.vue'
@@ -33,9 +35,17 @@ function toggleTheme() {
 /* ---------- Persisted UI state ---------- */
 const filter = ref(localStorage.getItem('filter') || 'all')
 const sortBy = ref(localStorage.getItem('sortBy') || 'created')
+const view = ref(localStorage.getItem('view') || 'list')
 const search = ref('')
+const selectedDate = ref('')
 watch(filter, (v) => localStorage.setItem('filter', v))
 watch(sortBy, (v) => localStorage.setItem('sortBy', v))
+watch(view, (v) => localStorage.setItem('view', v))
+
+const viewOptions = [
+  { value: 'list', label: '📋 列表' },
+  { value: 'calendar', label: '📅 行事曆' },
+]
 
 /* ---------- App state ---------- */
 const tasks = ref([])
@@ -323,6 +333,12 @@ function focusForm() {
   taskFormRef.value?.focusTitle()
 }
 
+async function handleAddOnDate(date) {
+  editing.value = null
+  await nextTick()
+  taskFormRef.value?.setDueDate(date)
+}
+
 /* ---------- Keyboard shortcuts ---------- */
 function isTypingTarget(el) {
   if (!el) return false
@@ -375,6 +391,10 @@ function onGlobalKey(e) {
     case 't':
     case 'T':
       toggleTheme()
+      break
+    case 'v':
+    case 'V':
+      view.value = view.value === 'list' ? 'calendar' : 'list'
       break
     case '?':
       helpVisible.value = !helpVisible.value
@@ -444,7 +464,13 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onGlobalKey))
         @cancel="cancelEdit"
       />
     </section>
-    <section class="card">
+    <section class="card tasks-card">
+      <SegmentedControl
+        v-model="view"
+        :options="viewOptions"
+        aria-label="檢視模式"
+        class="view-toggle"
+      />
       <TaskFilters
         ref="taskFiltersRef"
         v-model:filter="filter"
@@ -453,16 +479,29 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onGlobalKey))
         :stats="stats"
         @clear-completed="handleClearCompleted"
       />
-      <TaskList
-        :tasks="filteredTasks"
-        :loading="loading"
-        :filter-active="isFilterActive"
-        @edit="startEdit"
-        @delete="handleDelete"
-        @cycle-status="handleCycleStatus"
-        @reset-filter="resetFilter"
-        @add-first="focusForm"
-      />
+      <div :class="['tasks-container', 'view-' + view]">
+        <div class="list-pane">
+          <TaskList
+            :tasks="filteredTasks"
+            :loading="loading"
+            :filter-active="isFilterActive"
+            @edit="startEdit"
+            @delete="handleDelete"
+            @cycle-status="handleCycleStatus"
+            @reset-filter="resetFilter"
+            @add-first="focusForm"
+          />
+        </div>
+        <div class="calendar-pane">
+          <CalendarView
+            v-model:selected-date="selectedDate"
+            :tasks="filteredTasks"
+            @edit-task="startEdit"
+            @cycle-status="handleCycleStatus"
+            @add-on-date="handleAddOnDate"
+          />
+        </div>
+      </div>
     </section>
   </main>
 
