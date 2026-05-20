@@ -1,5 +1,6 @@
 <script setup>
 import { ref, watch, nextTick, useTemplateRef } from 'vue'
+import SegmentedControl from './SegmentedControl.vue'
 
 const props = defineProps({
   initial: { type: Object, default: null },
@@ -12,6 +13,17 @@ function emptyForm() {
 
 const form = ref(emptyForm())
 const titleInput = useTemplateRef('titleInput')
+
+const statusOptions = [
+  { value: 'TODO', label: '⚪ 待辦' },
+  { value: 'IN_PROGRESS', label: '🔵 進行中' },
+  { value: 'DONE', label: '✅ 已完成' },
+]
+const priorityOptions = [
+  { value: 'HIGH', label: '🔴 高' },
+  { value: 'MEDIUM', label: '🟡 中' },
+  { value: 'LOW', label: '⚪ 低' },
+]
 
 watch(
   () => props.initial,
@@ -104,24 +116,14 @@ defineExpose({
         placeholder="補充細節（選填）"
       />
     </label>
-    <div class="row two">
-      <label>
-        狀態
-        <select v-model="form.status">
-          <option value="TODO">⚪ 待辦</option>
-          <option value="IN_PROGRESS">🔵 進行中</option>
-          <option value="DONE">✅ 已完成</option>
-        </select>
-      </label>
-      <label>
-        優先級
-        <select v-model="form.priority">
-          <option value="HIGH">🔴 高</option>
-          <option value="MEDIUM">🟡 中</option>
-          <option value="LOW">⚪ 低</option>
-        </select>
-      </label>
-    </div>
+    <label>
+      狀態
+      <SegmentedControl v-model="form.status" :options="statusOptions" aria-label="狀態" />
+    </label>
+    <label>
+      優先級
+      <SegmentedControl v-model="form.priority" :options="priorityOptions" aria-label="優先級" />
+    </label>
     <label class="date-label">
       截止日
       <div class="date-presets">
