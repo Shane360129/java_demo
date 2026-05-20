@@ -51,6 +51,8 @@ const viewOptions = [
 const tasks = ref([])
 const editing = ref(null)
 const loading = ref(true)
+const slowLoad = ref(false)
+let slowLoadTimer
 
 const taskFormRef = useTemplateRef('taskFormRef')
 const taskFiltersRef = useTemplateRef('taskFiltersRef')
@@ -191,6 +193,11 @@ const filteredTasks = computed(() => {
 /* ---------- Actions ---------- */
 async function refresh() {
   loading.value = true
+  slowLoad.value = false
+  clearTimeout(slowLoadTimer)
+  slowLoadTimer = setTimeout(() => {
+    if (loading.value) slowLoad.value = true
+  }, 2500)
   try {
     tasks.value = await listTasks()
   } catch (e) {
@@ -198,6 +205,8 @@ async function refresh() {
     showToast('無法載入任務，請確認後端是否啟動', 'error')
   } finally {
     loading.value = false
+    slowLoad.value = false
+    clearTimeout(slowLoadTimer)
   }
 }
 
@@ -484,6 +493,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onGlobalKey))
           <TaskList
             :tasks="filteredTasks"
             :loading="loading"
+            :slow-load="slowLoad"
             :filter-active="isFilterActive"
             @edit="startEdit"
             @delete="handleDelete"

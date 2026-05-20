@@ -7,6 +7,13 @@ export default defineConfig({
   build: {
     outDir: process.env.VITE_OUT_DIR || '../src/main/resources/static',
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['vue', 'axios'],
+        },
+      },
+    },
   },
   server: {
     proxy: {

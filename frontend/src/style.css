@@ -818,6 +818,30 @@ button.small { padding: 0.4rem 0.75rem; font-size: 0.82rem; min-height: 36px; }
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+.slow-hint {
+  margin: 0.75rem 0 0;
+  padding: 0.6rem 0.8rem;
+  background: var(--primary-light);
+  color: var(--primary);
+  border-radius: 8px;
+  font-size: 0.82rem;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.cal-empty {
+  margin-top: 0.4rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg);
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+.cal-empty-icon { font-size: 1.4rem; flex-shrink: 0; }
 
 /* === Toast === */
 .toast {

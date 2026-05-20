@@ -46,6 +46,17 @@ const monthLabel = computed(
   () => `${cursor.value.year} 年 ${cursor.value.month + 1} 月`,
 )
 
+const tasksByDate = computed(() => {
+  const map = new Map()
+  for (const t of props.tasks) {
+    if (!t.dueDate) continue
+    const list = map.get(t.dueDate)
+    if (list) list.push(t)
+    else map.set(t.dueDate, [t])
+  }
+  return map
+})
+
 const days = computed(() => {
   const { year, month } = cursor.value
   const startDow = new Date(year, month, 1).getDay()
@@ -69,7 +80,7 @@ const days = computed(() => {
 
 function buildDay(date, isCurrentMonth) {
   const ds = ymd(date)
-  const tasksOnDay = props.tasks.filter((t) => t.dueDate === ds)
+  const tasksOnDay = tasksByDate.value.get(ds) || []
   return {
     date,
     ds,
@@ -81,6 +92,8 @@ function buildDay(date, isCurrentMonth) {
     tasks: tasksOnDay,
   }
 }
+
+const hasAnyTasks = computed(() => props.tasks.length > 0)
 
 const selectedTasks = computed(() => {
   if (!props.selectedDate) return []
@@ -164,6 +177,11 @@ function formatSelectedLabel(s) {
           <span v-if="day.tasks.length > 3" class="day-more">+{{ day.tasks.length - 3 }}</span>
         </div>
       </button>
+    </div>
+
+    <div v-if="!hasAnyTasks" class="cal-empty">
+      <span class="cal-empty-icon" aria-hidden="true">🗓️</span>
+      <span>還沒有任務，新增第一筆之後這裡就會看到日期上的點。</span>
     </div>
 
     <div class="selected-panel">
